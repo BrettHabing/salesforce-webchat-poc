@@ -131,57 +131,26 @@
     tick();
   </script>
 
-<!-- Embedded Service (Enhanced Chat) for DemoGroup -->
-<style type='text/css'>
-    .embeddedServiceHelpButton .helpButton .uiButton {
-        background-color: #005290;
-        font-family: "Arial", sans-serif;
-    }
-    .embeddedServiceHelpButton .helpButton .uiButton:focus {
-        outline: 1px solid #005290;
-    }
-</style>
-
-<script type='text/javascript' src='https://service.force.com/embeddedservice/5.0/esw.min.js'></script>
+<!-- Embedded Service (Enhanced Chat) for ChatPOC -->
 <script type='text/javascript'>
-    var initESW = function(gslbBaseURL) {
-        embedded_svc.settings.displayHelpButton = true;
-        embedded_svc.settings.language = '';
-        // embedded_svc.settings.defaultMinimizedText = 'Chat with Us';
-        // embedded_svc.settings.disabledMinimizedText = 'Agents Offline';
-        // embedded_svc.settings.offlineSupportMinimizedText = 'Contact Us';
+	function initEmbeddedMessaging() {
+		try {
+			embeddedservice_bootstrap.settings.language = 'en_US';
 
-        embedded_svc.settings.enabledFeatures = ['LiveAgent'];
-        embedded_svc.settings.entryFeature = 'LiveAgent';
-
-        embedded_svc.init(
-            'https://arcbestcorp--brett.sandbox.my.salesforce.com',
-            'https://arcbestcorp--brett.sandbox.my.site.com/oppassistant',
-            gslbBaseURL,
-            '00Dbc000007aagr',   // Org ID
-            'DemoGroup',         // Deployment Name
-            {
-                baseLiveAgentContentURL: 'https://c.la12s-core1.sfdc-yfeipo.salesforceliveagent.com/content',
-                deploymentId: '572bc000001vPIr',
-                buttonId: '573bc000001D6S1',
-                baseLiveAgentURL: 'https://d.la12s-core1.sfdc-yfeipo.salesforceliveagent.com/chat',
-                eswLiveAgentDevName: 'DemoGroup',
-                isOfflineSupportEnabled: true
-            }
-        );
-    };
-
-    if (!window.embedded_svc) {
-        var s = document.createElement('script');
-        s.setAttribute('src', 'https://arcbestcorp--brett.sandbox.my.salesforce.com/embeddedservice/5.0/esw.min.js');
-        s.onload = function() {
-            initESW(null);
-        };
-        document.body.appendChild(s);
-    } else {
-        initESW('https://service.force.com');
-    }
+			embeddedservice_bootstrap.init(
+				'00Dbc000007aagr',
+				'ChatPOC',
+				'https://arcbestcorp--brett.sandbox.my.site.com/ESWChatPOC1778101859907',
+				{
+					scrt2URL: 'https://arcbestcorp--brett.sandbox.my.salesforce-scrt.com'
+				}
+			);
+		} catch (err) {
+			console.error('Error loading Embedded Messaging: ', err);
+		}
+	};
 </script>
+<script type='text/javascript' src='https://arcbestcorp--brett.sandbox.my.site.com/ESWChatPOC1778101859907/assets/js/bootstrap.min.js' onload='initEmbeddedMessaging()'></script>
 
 </body>
 </html>
