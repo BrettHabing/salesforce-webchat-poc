@@ -5,30 +5,131 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Salesforce Web Chat POC</title>
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     body {
+      min-height: 100vh;
+      background: #0a0e1a;
       font-family: Arial, sans-serif;
-      max-width: 800px;
-      margin: 60px auto;
-      padding: 0 20px;
-      background: #f4f6f8;
-      color: #333;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      overflow: hidden;
     }
-    h1 { color: #0070d2; }
-    .status {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 20px;
-      margin-top: 20px;
+
+    h1 {
+      position: relative;
+      z-index: 10;
+      margin-top: 48px;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: rgba(255,255,255,0.85);
+      text-transform: uppercase;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
     }
   </style>
 </head>
 <body>
   <h1>Salesforce Web Chat POC</h1>
-  <div class="status">
-    <p>Chat widget will appear in the bottom-right corner once the Salesforce embed code is configured.</p>
-    <p>Status: <strong>Awaiting Salesforce embed code</strong></p>
-  </div>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    let W, H, shapes;
+
+    const COLORS = ['#005290', '#0070d2', '#1a9fd8', '#00a1e0', '#032d60', '#7b9fc7'];
+
+    function rand(min, max) { return Math.random() * (max - min) + min; }
+
+    function makeShape() {
+      const type = ['triangle', 'rect', 'hexagon'][Math.floor(Math.random() * 3)];
+      return {
+        type,
+        x: rand(0, W),
+        y: rand(0, H),
+        size: rand(30, 120),
+        rotation: rand(0, Math.PI * 2),
+        rotSpeed: rand(-0.004, 0.004),
+        dx: rand(-0.3, 0.3),
+        dy: rand(-0.3, 0.3),
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        alpha: rand(0.06, 0.22),
+      };
+    }
+
+    function init() {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+      shapes = Array.from({ length: 38 }, makeShape);
+    }
+
+    function drawTriangle(s) {
+      ctx.beginPath();
+      ctx.moveTo(0, -s.size);
+      ctx.lineTo(s.size * 0.866, s.size * 0.5);
+      ctx.lineTo(-s.size * 0.866, s.size * 0.5);
+      ctx.closePath();
+    }
+
+    function drawRect(s) {
+      const w = s.size * 1.4, h = s.size * 0.9;
+      ctx.beginPath();
+      ctx.rect(-w / 2, -h / 2, w, h);
+    }
+
+    function drawHexagon(s) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i;
+        const px = Math.cos(angle) * s.size;
+        const py = Math.sin(angle) * s.size;
+        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    }
+
+    function draw(s) {
+      ctx.save();
+      ctx.translate(s.x, s.y);
+      ctx.rotate(s.rotation);
+      ctx.globalAlpha = s.alpha;
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = 1.5;
+      if (s.type === 'triangle') drawTriangle(s);
+      else if (s.type === 'rect') drawRect(s);
+      else drawHexagon(s);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, W, H);
+      for (const s of shapes) {
+        s.x += s.dx;
+        s.y += s.dy;
+        s.rotation += s.rotSpeed;
+        if (s.x < -s.size * 1.5) s.x = W + s.size;
+        if (s.x > W + s.size * 1.5) s.x = -s.size;
+        if (s.y < -s.size * 1.5) s.y = H + s.size;
+        if (s.y > H + s.size * 1.5) s.y = -s.size;
+        draw(s);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    window.addEventListener('resize', init);
+    init();
+    tick();
+  </script>
 
 <!-- Embedded Service (Enhanced Chat) for DemoGroup -->
 <style type='text/css'>
